@@ -34,8 +34,8 @@ class RegisterController extends Controller
             'email' => $request->email,
             'npm' => $request->npm,
             'username' => $request->username,
-            'password' => Hash::make($request->password), // Pastikan di-hash
-            'status' => 0, // Set default status to 0
+            'password' => Hash::make($request->password),
+            'status' => 0, 
         ]);
 
         return redirect()->route('login')->with('success', 'Registration successful! You can now log in.');
