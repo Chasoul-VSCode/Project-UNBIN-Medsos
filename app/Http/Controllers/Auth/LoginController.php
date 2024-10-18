@@ -29,7 +29,7 @@ public function login(Request $request)
     }
 
     return back()->withErrors([
-        'username' => 'The provided credentials do not match our records.',
+        'username' => 'username dan password salah',
     ]);
 }
 
@@ -47,7 +47,7 @@ public function login(Request $request)
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return redirect('login');
+    return redirect('/');
 }
 
 }

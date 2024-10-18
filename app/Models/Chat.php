@@ -11,7 +11,7 @@ class Chat extends Model
         'judul',
         'isi',
         'tanggal',
-        'sebut'
+        'sebut',
     ];
 
     protected $casts = [

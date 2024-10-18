@@ -18,8 +18,8 @@
             --border-color: #333333;
             --logout-color: #e74c3c;
             --logout-hover: #c0392b;
-            --new-post-color: #2ecc71;
-            --new-post-hover: #27ae60;
+            --new-post-color: #3498db;
+            --new-post-hover: #2980b9;
         }
 
         body {
@@ -54,6 +54,7 @@
         h1 {
             font-size: 1.5rem;
             margin-bottom: 10px;
+            text-align: left;
         }
 
         h2 {
@@ -117,16 +118,14 @@
             transition: background-color 0.3s ease;
             font-weight: 500;
             font-size: 0.9rem;
-            width: 100%;
-            margin-bottom: 10px;
             display: inline-block;
             text-align: center;
         }
 
         .btn-logout {
             background-color: var(--logout-color);
+            margin-top: 0;
             float: right;
-            margin-left: 10px;
         }
 
         .btn-logout:hover {
@@ -199,40 +198,39 @@
 
         header .container > div {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            justify-content: space-between;
             align-items: center;
         }
 
         header .container > div form {
-            margin-top: 10px;
-            width: 100%;
+            margin-top: 0;
+            width: auto;
         }
 
         .active-users {
-            background-color: var(--bg-tertiary);
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            font-weight: 500;
             color: var(--accent-color);
-            text-align: center;
-            width: 100%;
+            font-size: 0.8rem;
+            margin-left: 15px;
         }
 
-                .notification-button {
+        .notification-button {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: var(--accent-color);
             color: white;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transition: background-color 0.3s, transform 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .notification-button:hover {
@@ -240,30 +238,63 @@
             transform: scale(1.1);
         }
 
-        @media (min-width: 768px) {
-            .container {
-                max-width: 750px;
-            }
+        .logo-image {
+            width: 70px;
+            height: auto;
+        }
 
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            margin-left: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 767px) {
             .btn {
                 width: auto;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .btn-logout, .btn-new-post {
+                width: auto;
+                display: inline-block;
+            }
+
+            .active-users {
+                font-size: 0.7rem;
+            }
+
+            .notification-button {
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
             }
 
             header .container > div {
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
+                padding: 5px 0; /* Reduce vertical padding */
+                min-height: 40px; /* Set a minimum height */
             }
 
-            header .container > div form {
-                margin-top: 0;
-                width: auto;
+            .btn-logout {
+                margin-left: 10px;
             }
 
-            .active-users {
-                width: auto;
-                margin-bottom: 0;
-                margin-right: 15px;
+            .logo-image {
+                width: 50px;
+            }
+
+            .logo-text {
+                font-size: 18px;
             }
         }
 
@@ -277,6 +308,23 @@
             .container {
                 max-width: 1170px;
             }
+
+            .active-users {
+                margin-bottom: 0;
+                margin-top: 0;
+                font-size: 0.8rem;
+            }
+
+            .btn-logout {
+                position: static;
+                margin-left: 10px;
+            }
+
+            .notification-button {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -289,29 +337,32 @@
     <header>
         <div class="container">
             <div>
-                <h1>MediaChat</h1>
-                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                    @php
-                        $activeUsers = App\Models\User::where('status', 1)->count();
-                    @endphp
-                    <div class="active-users">
-                        <i class="fas fa-users"></i> Active Users: {{ $activeUsers }}
-                    </div>
-                    <form action="{{ route('logout') }}" method="POST" class="logout-form" style="width: 100%;">
-                        @csrf
-                        <button type="submit" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                    </form>
+                <div class="logo-container">
+                    <img src="{{ asset('images/logo unbin.png') }}" alt="MediaChat Logo" class="logo-image">
+                    <span class="logo-text">BMS</span>
                 </div>
+                <form action="{{ route('logout') }}" method="POST" class="logout-form" style="width: auto;">
+                    @csrf
+                    <button type="submit" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </form>
             </div>
         </div>
     </header>
 
-      <div class="container">
-        <button class="btn btn-new-post" onclick="toggleForm()" style="margin-bottom: 15px;">
-            <i class="fas fa-plus"></i> New Post
-        </button>
+    <div class="container">
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <button class="btn btn-new-post" onclick="toggleForm()">
+                <i class="fas fa-plus"></i> New Post
+            </button>
+            @php
+                $activeUsers = App\Models\User::where('status', 1)->count();
+            @endphp
+            <div class="active-users">
+                <i class="fas fa-users"></i> Active Users: {{ $activeUsers }}
+            </div>
+        </div>
 
-         <div class="post-form" id="postForm" style="display: none;">
+        <div class="post-form" id="postForm" style="display: none;">
             <h2>Create a New Post</h2>
             <form method="POST" action="{{ route('chats.store') }}">
                 @csrf

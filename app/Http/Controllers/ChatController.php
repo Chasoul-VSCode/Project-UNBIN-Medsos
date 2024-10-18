@@ -24,9 +24,13 @@ class ChatController extends Controller
         $mention = 'Everyone';
     }
 
+    // Get the authenticated user's NPM
+    $user = Auth::user();
+    $username = $user->username;
+
     // Create a new chat entry
     Chat::create([
-        'pengirim' => Auth::id(),
+        'pengirim' => $username, // Use NPM instead of Auth::id()
         'judul' => $request->judul,
         'isi' => $request->isi,
         'tanggal' => now(),
