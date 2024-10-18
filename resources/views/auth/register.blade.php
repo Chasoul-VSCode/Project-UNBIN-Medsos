@@ -40,6 +40,7 @@
         .input-group {
             position: relative;
             margin-bottom: 1.5rem;
+            margin-right: 25px;
         }
         input {
             width: 100%;
@@ -126,6 +127,10 @@
             <div class="input-group">
                 <input type="email" name="email" id="email" required autofocus placeholder=" ">
                 <label for="email">Email</label>
+            </div>
+            <div class="input-group">
+                <input type="text" name="npm" id="npm" required placeholder=" ">
+                <label for="npm">NPM</label>
             </div>
             <div class="input-group">
                 <input type="text" name="username" id="username" required placeholder=" ">

@@ -14,24 +14,40 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
-    {
-        $credentials = $request->only('username', 'password');
+public function login(Request $request)
+{
+    $credentials = $request->only('username', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'));
-        }
+        $user = Auth::user();
+        $user->status = 1;
+        $user->save();
 
-        return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ]);
+        return redirect()->intended(route('dashboard'));
     }
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        return redirect('login'); // Redirect to the desired page after logout
+    return back()->withErrors([
+        'username' => 'The provided credentials do not match our records.',
+    ]);
+}
+
+
+   public function logout(Request $request)
+{
+
+    $user = Auth::user();
+
+    if ($user) {
+        $user->status = 0;
+        $user->save();
     }
+
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('login');
+}
+
 }

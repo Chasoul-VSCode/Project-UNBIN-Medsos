@@ -16,6 +16,10 @@
             --accent-color: #3498db;
             --accent-hover: #2980b9;
             --border-color: #333333;
+            --logout-color: #e74c3c;
+            --logout-hover: #c0392b;
+            --new-post-color: #2ecc71;
+            --new-post-hover: #27ae60;
         }
 
         body {
@@ -49,6 +53,7 @@
 
         h1 {
             font-size: 1.5rem;
+            margin-bottom: 10px;
         }
 
         h2 {
@@ -104,7 +109,6 @@
         }
 
         .btn {
-            background-color: var(--accent-color);
             color: white;
             border: none;
             padding: 10px 15px;
@@ -115,10 +119,26 @@
             font-size: 0.9rem;
             width: 100%;
             margin-bottom: 10px;
+            display: inline-block;
+            text-align: center;
         }
 
-        .btn:hover {
-            background-color: var(--accent-hover);
+        .btn-logout {
+            background-color: var(--logout-color);
+            float: right;
+            margin-left: 10px;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--logout-hover);
+        }
+
+        .btn-new-post {
+            background-color: var(--new-post-color);
+        }
+
+        .btn-new-post:hover {
+            background-color: var(--new-post-hover);
         }
 
         .chat-item {
@@ -178,13 +198,46 @@
         }
 
         header .container > div {
+            display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
 
         header .container > div form {
             margin-top: 10px;
             width: 100%;
+        }
+
+        .active-users {
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: var(--accent-color);
+            text-align: center;
+            width: 100%;
+        }
+
+                .notification-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .notification-button:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.1);
         }
 
         @media (min-width: 768px) {
@@ -206,6 +259,12 @@
                 margin-top: 0;
                 width: auto;
             }
+
+            .active-users {
+                width: auto;
+                margin-bottom: 0;
+                margin-right: 15px;
+            }
         }
 
         @media (min-width: 992px) {
@@ -221,22 +280,38 @@
         }
     </style>
 </head>
+
+@php
+    $loggedInUser = Auth::user()->username; // Get the username of the logged-in user
+@endphp
+
 <body>
     <header>
         <div class="container">
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+            <div>
                 <h1>MediaChat</h1>
-                <form action="{{ route('logout') }}" method="POST" class="logout-form">
-                    @csrf
-                    <button type="submit" class="btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </form>
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    @php
+                        $activeUsers = App\Models\User::where('status', 1)->count();
+                    @endphp
+                    <div class="active-users">
+                        <i class="fas fa-users"></i> Active Users: {{ $activeUsers }}
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST" class="logout-form" style="width: 100%;">
+                        @csrf
+                        <button type="submit" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </form>
+                </div>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <button class="btn" onclick="toggleForm()"><i class="fas fa-plus"></i> New Post</button>
-        <div class="post-form" id="postForm" style="display: none;">
+      <div class="container">
+        <button class="btn btn-new-post" onclick="toggleForm()" style="margin-bottom: 15px;">
+            <i class="fas fa-plus"></i> New Post
+        </button>
+
+         <div class="post-form" id="postForm" style="display: none;">
             <h2>Create a New Post</h2>
             <form method="POST" action="{{ route('chats.store') }}">
                 @csrf
@@ -248,7 +323,7 @@
                     <div id="mentionSuggestions" class="mention-suggestions"></div>
                 </div>
                 <div>
-                    <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Post</button>
+                    <button type="submit" class="btn btn-new-post"><i class="fas fa-paper-plane"></i> Post</button>
                 </div>
             </form>
         </div>
@@ -256,22 +331,27 @@
         <div class="content">
             <div class="widget">
                 <h2><i class="fas fa-comments"></i> Recent Posts</h2>
-                <div class="chat-list">
+                <div class="chat-list" id="chatList">
                     @php
                         $chats = App\Models\Chat::orderBy('tanggal', 'desc')->get();
                     @endphp
                     @if($chats->count() > 0)
                         @foreach($chats as $chat)
-                            <div class="chat-item">
-                                <h3>{{ $chat->judul }}</h3>
-                                <p>{{ $chat->isi }}</p>
-                                <p class="meta">
-                                    <i class="far fa-clock"></i> Posted on: {{ $chat->tanggal->format('M d, Y') }}
-                                </p>
-                                <p class="meta">
-                                    <i class="fas fa-user-tag"></i> Mentioned: {{ $chat->sebut }}
-                                </p>
-                            </div>
+                        <div class="chat-item" data-mention="{{ $chat->sebut }}">
+                            <h3>{{ $chat->judul }}</h3>
+                            <p>{{ $chat->isi }}</p>
+                            <p class="meta">
+                                <i class="far fa-clock"></i> Posted on: {{ $chat->tanggal->format('M d, Y H:i') }}
+                            </p>
+                            <p class="meta">
+                                <i class="fas fa-user-tag"></i> Mentioned: 
+                                @if($chat->sebut === 'Everyone')
+                                    <strong>@everyone</strong>
+                                @else
+                                    {{ $chat->sebut }}
+                                @endif
+                            </p>
+                        </div>
                         @endforeach
                     @else
                         <p>No recent posts available.</p>
@@ -281,14 +361,39 @@
         </div>
     </div>
 
-    <!--<footer>-->
-    <!--    <div class="container">-->
-    <!--        <p>&copy; 2024 Universitas Binaniaga Indonesia</p>-->
-    <!--    </div>-->
-    <!--</footer>-->
+    <button id="notificationButton" class="notification-button"><i class="fas fa-bell"></i></button>
 
     <script>
-        function toggleForm() {
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = @json($loggedInUser); // Get the logged-in user's username
+            const notificationButton = document.getElementById('notificationButton');
+            const chatList = document.getElementById('chatList');
+            let showingMentions = false; // Track whether we're showing mentions or not
+
+            notificationButton.addEventListener('click', function() {
+                const chatItems = chatList.getElementsByClassName('chat-item');
+
+                if (!showingMentions) {
+                    // Filter to show only the chats where the user is mentioned
+                    for (let chatItem of chatItems) {
+                        const mention = chatItem.getAttribute('data-mention');
+                        if (mention !== loggedInUser && mention !== 'Everyone') {
+                            chatItem.style.display = 'none'; // Hide chat items where user is not mentioned
+                        } else {
+                            chatItem.style.display = 'block'; // Show chat items where user is mentioned
+                        }
+                    }
+                    showingMentions = true; // Update the toggle state
+                } else {
+                    // Reset to show all chats
+                    for (let chatItem of chatItems) {
+                        chatItem.style.display = 'block';
+                    }
+                    showingMentions = false; // Update the toggle state
+                }
+            });
+        });
+            function toggleForm() {
             var form = document.getElementById("postForm");
             if (form.style.display === "none") {
                 form.style.display = "block";
@@ -302,6 +407,8 @@
             const selectedMention = document.getElementById('selectedMention');
             const mentionSuggestions = document.getElementById('mentionSuggestions');
             const users = @json(App\Models\User::pluck('username'));
+
+             users.push('@everyone');
 
             mentionInput.addEventListener('input', function() {
                 const inputValue = this.value.toLowerCase();
@@ -325,7 +432,8 @@
                     mentionSuggestions.innerHTML = '';
                 }
             });
-        });
+             });
     </script>
+
 </body>
 </html>

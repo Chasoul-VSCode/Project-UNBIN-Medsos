@@ -20,6 +20,7 @@ class RegisterController extends Controller
         // Validasi input
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
+            'npm' => 'required|string|min:3|max:20|unique:users,npm',
             'username' => 'required|string|min:3|max:20|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -31,11 +32,12 @@ class RegisterController extends Controller
         // Simpan pengguna baru
         User::create([
             'email' => $request->email,
+            'npm' => $request->npm,
             'username' => $request->username,
             'password' => Hash::make($request->password), // Pastikan di-hash
+            'status' => 0, // Set default status to 0
         ]);
 
         return redirect()->route('login')->with('success', 'Registration successful! You can now log in.');
     }
 }
-
