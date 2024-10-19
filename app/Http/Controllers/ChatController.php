@@ -33,7 +33,7 @@ class ChatController extends Controller
         'pengirim' => $username, // Use NPM instead of Auth::id()
         'judul' => $request->judul,
         'isi' => $request->isi,
-        'tanggal' => now(),
+        'tanggal' => now()->setTimezone('Asia/Jakarta'),
         'sebut' => $mention, // Save the mention, either a user or 'Everyone'
     ]);
 
